@@ -4,6 +4,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import io.fimataf.ancestry.MongodbAncestryEventListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
@@ -13,7 +14,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * Created on: 21/01/2021
  */
 @EnableMongoRepositories
-public class LocalMongoConfig {
+public class LocalMongodbConfig {
 
     @Bean
     public MongoTemplate mongoTemplate() throws Exception {
@@ -23,6 +24,11 @@ public class LocalMongoConfig {
                 .build();
         MongoClient client =  MongoClients.create(mongoClientSetting);
         return new MongoTemplate(client, "mongotest");
+    }
+
+    @Bean
+    public MongodbAncestryEventListener mongodbAncestryEventListener () {
+        return new MongodbAncestryEventListener();
     }
 
 }

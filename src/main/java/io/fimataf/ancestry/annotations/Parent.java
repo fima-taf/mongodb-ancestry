@@ -1,4 +1,4 @@
-package com.kanbordz.interceptors.annotations;
+package io.fimataf.ancestry.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,4 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Parent {
+
+    boolean keepAfterSave () default false;
 }
