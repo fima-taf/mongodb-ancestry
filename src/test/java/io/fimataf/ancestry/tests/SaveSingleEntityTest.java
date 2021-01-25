@@ -16,51 +16,75 @@ public class SaveSingleEntityTest extends LocalMongodbTest {
 
     @Test
     void saveEntityWithChildAnnotation () {
-        SaveSingleEntityB sseb = new SaveSingleEntityB("sam@gmail.com");
-        SaveSingleEntityA ssea = new SaveSingleEntityA("Sam", sseb);
-        SaveSingleEntityA savedEmp = mongoTemplate.insert(ssea);
+        ChildA cA = new ChildA("Bar Save");
+        ParentA pA = new ParentA("saveEntityWithChildAnnotation", cA);
+        ParentA savedPA = mongoTemplate.insert(pA);
 
-        Assertions.assertNotNull(savedEmp.getId());
+        Assertions.assertNotNull(savedPA.getId());
 
         Query q = new Query();
-        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("saveSingleEntityB")).is(savedEmp.getSaveSingleEntityB().getId()));
-        io.fimataf.ancestry.entities.explicit.SaveSingleEntityA expEmp = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.SaveSingleEntityA.class);
-        Assertions.assertNotNull(expEmp.get_saveSingleEntityBId());
-        Assertions.assertEquals(savedEmp.getSaveSingleEntityB().getId(), expEmp.get_saveSingleEntityBId());
+        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("childA")).is(savedPA.getChildA().getId()));
+        io.fimataf.ancestry.entities.explicit.ParentA expPA = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ParentA.class);
+
+        Assertions.assertNotNull(expPA);
+        Assertions.assertNotNull(expPA.get_childAId());
+        Assertions.assertEquals(savedPA.getChildA().getId(), expPA.get_childAId());
+    }
+
+    @Test
+    void saveEntityWithChildAnnotationAndChildIsNull () {
+        ParentA pA = new ParentA("saveEntityWithChildAnnotationAndChildIsNull");
+        ParentA savedPA = mongoTemplate.insert(pA);
+
+        Assertions.assertNotNull(savedPA.getId());
+
+    }
+
+    @Test
+    void saveChildEntityWithParentAnnotationAndParentIsNull () {
+        ChildB cB = new ChildB("saveChildEntityWithParentAnnotationAndParentIsNull");
+        ChildB savedCB = mongoTemplate.insert(cB);
+
+        Assertions.assertNotNull(savedCB.getId());
+
     }
 
     @Test
     void saveEntityWithChildAndParentAnnotations () {
-        SaveSingleEntityD ssed  = new SaveSingleEntityD("D");
-        SaveSingleEntityC ssec = new SaveSingleEntityC("C", ssed);
-        SaveSingleEntityC savedSsec = mongoTemplate.insert(ssec);
+        ChildB cB  = new ChildB("Doctor");
+        ParentB pB = new ParentB("saveEntityWithChildAndParentAnnotations", cB);
+        ParentB savedPB = mongoTemplate.insert(pB);
 
-        Assertions.assertNotNull(savedSsec.getId());
+        Assertions.assertNotNull(savedPB.getId());
 
         Query q = new Query();
-        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("saveSingleEntityC")).is(savedSsec.getId()));
-        io.fimataf.ancestry.entities.explicit.SaveSingleEntityD expSsed = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.SaveSingleEntityD.class);
-        Assertions.assertNotNull(expSsed.get_saveSingleEntityCId());
-        Assertions.assertEquals(savedSsec.getId(), expSsed.get_saveSingleEntityCId());
+        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("parentB")).is(savedPB.getId()));
+        io.fimataf.ancestry.entities.explicit.ChildB expCB = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ChildB.class);
 
-        Assertions.assertNull(savedSsec.getSaveSingleEntityD().getSaveSingleEntityC());
+        Assertions.assertNotNull(expCB);
+        Assertions.assertNotNull(expCB.get_parentBId());
+        Assertions.assertEquals(savedPB.getId(), expCB.get_parentBId());
+
+        Assertions.assertNull(savedPB.getChildB().getParentB());
     }
 
     @Test
-    void saveEntityWithChildAndParentAnnotationsAndKeepParent () throws Exception {
-        SaveSingleEntityF ssef  = new SaveSingleEntityF("F");
-        SaveSingleEntityE ssee = new SaveSingleEntityE("E", ssef);
-        SaveSingleEntityE savedSsee = mongoTemplate.insert(ssee);
+    void saveEntityWithChildAndParentAnnotationsAndKeepParent () {
+        ChildC cC  = new ChildC("Foo");
+        ParentC pC = new ParentC("saveEntityWithChildAndParentAnnotationsAndKeepParent", cC);
+        ParentC savedPC = mongoTemplate.insert(pC);
 
-        Assertions.assertNotNull(savedSsee.getId());
+        Assertions.assertNotNull(savedPC.getId());
 
         Query q = new Query();
-        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("saveSingleEntityE")).is(savedSsee.getId()));
-        io.fimataf.ancestry.entities.explicit.SaveSingleEntityF expSsef = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.SaveSingleEntityF.class);
-        Assertions.assertNotNull(expSsef.get_saveSingleEntityEId());
-        Assertions.assertEquals(savedSsee.getId(), expSsef.get_saveSingleEntityEId());
+        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("parentC")).is(savedPC.getId()));
+        io.fimataf.ancestry.entities.explicit.ChildC expCC = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ChildC.class);
 
-        Assertions.assertNotNull(savedSsee.getSaveSingleEntityF().getSaveSingleEntityE());
+        Assertions.assertNotNull(expCC);
+        Assertions.assertNotNull(expCC.get_parentCId());
+        Assertions.assertEquals(savedPC.getId(), expCC.get_parentCId());
+
+        Assertions.assertNotNull(savedPC.getChildC().getParentC());
     }
 
 }

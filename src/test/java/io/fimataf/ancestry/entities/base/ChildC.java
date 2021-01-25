@@ -1,7 +1,8 @@
 package io.fimataf.ancestry.entities.base;
 
-import io.fimataf.ancestry.annotations.Child;
+import io.fimataf.ancestry.annotations.Parent;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -9,22 +10,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 23/01/2021
  */
 @Document
-public class SaveSingleEntityE {
+@TypeAlias("childC")
+public class ChildC {
 
     @Id
     private String id;
 
     private String name;
 
-    @Child(linkToChild = true)
-    private SaveSingleEntityF saveSingleEntityF;
+    @Parent(keepAfterSave = true)
+    private ParentC parentC;
 
-    public SaveSingleEntityE(String name, SaveSingleEntityF saveSingleEntityF) {
+    public ChildC(String name) {
         this.name = name;
-        this.saveSingleEntityF = saveSingleEntityF;
-    }
-
-    public SaveSingleEntityE() {
     }
 
     public String getId() {
@@ -43,11 +41,11 @@ public class SaveSingleEntityE {
         this.name = name;
     }
 
-    public SaveSingleEntityF getSaveSingleEntityF() {
-        return saveSingleEntityF;
+    public ParentC getParentC() {
+        return parentC;
     }
 
-    public void setSaveSingleEntityF(SaveSingleEntityF saveSingleEntityF) {
-        this.saveSingleEntityF = saveSingleEntityF;
+    public void setParentC(ParentC parentC) {
+        this.parentC = parentC;
     }
 }

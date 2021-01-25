@@ -1,6 +1,7 @@
 package io.fimataf.ancestry.entities.base;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -8,17 +9,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 22/01/2021
  */
 @Document
-public class SaveSingleEntityB {
+public class ChildA {
 
     @Id
     private String id;
 
-    private String email;
+    @Indexed
+    private String name;
 
-
-    public SaveSingleEntityB(String email) {
-        this.email = email;
+    public ChildA(String name) {
+        this.name = name;
     }
+
+    public ChildA () {}
 
     public String getId() {
         return id;
@@ -28,12 +31,12 @@ public class SaveSingleEntityB {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public String getName() {
+        return name;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

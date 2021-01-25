@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import java.lang.reflect.Field;
 
@@ -66,6 +65,7 @@ public class BeforeSaveCallback extends AbstractSaveCallback {
 
     private void saveChildWithParentId (Field parentField) throws IllegalAccessException {
         Object parent = parentField.get(source);
+        if (parent == null) return;
         for (Field field : parent.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
                 ReflectionUtils.makeAccessible(field);

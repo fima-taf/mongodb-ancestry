@@ -6,18 +6,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author fima
- * Created on: 22/01/2021
+ * Created on: 23/01/2021
  */
 @Document
-@TypeAlias("saveSingleA")
-public class SaveSingleEntityA {
+@TypeAlias("childB")
+public class ChildB {
 
     @Id
     private String id;
 
     private String name;
 
-    private String _saveSingleEntityBId;
+    private String _parentBId;
 
     public String getId() {
         return id;
@@ -35,11 +35,11 @@ public class SaveSingleEntityA {
         this.name = name;
     }
 
-    public String get_saveSingleEntityBId() {
-        return _saveSingleEntityBId;
+    public String get_parentBId() {
+        return _parentBId;
     }
 
-    public void set_saveSingleEntityBId(String _saveSingleEntityBId) {
-        this._saveSingleEntityBId = _saveSingleEntityBId;
+    public void set_parentBId(String _parentBId) {
+        this._parentBId = _parentBId;
     }
 }

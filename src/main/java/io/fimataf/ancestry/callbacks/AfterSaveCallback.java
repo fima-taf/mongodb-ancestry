@@ -2,12 +2,10 @@ package io.fimataf.ancestry.callbacks;
 
 import io.fimataf.ancestry.annotations.Child;
 import io.fimataf.ancestry.annotations.Parent;
-import io.fimataf.ancestry.utils.AncestryUtils;
 import org.bson.Document;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import java.lang.reflect.Field;
 
@@ -38,6 +36,7 @@ public class AfterSaveCallback extends AbstractSaveCallback {
     }
 
     private void saveChild (Object child) throws Exception {
+        if (child == null) return;
         for (Field field : child.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Parent.class)) {
                 ReflectionUtils.makeAccessible(field);
@@ -49,8 +48,6 @@ public class AfterSaveCallback extends AbstractSaveCallback {
                 }
             }
         }
-        // remove from field
-        // add flag to annotation - if to duplicate parent or set to null.
     }
 
     private Object instanciateNewParentObject (boolean fullInstanciation) throws Exception {

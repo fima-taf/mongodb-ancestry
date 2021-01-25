@@ -2,6 +2,7 @@ package io.fimataf.ancestry.entities.base;
 
 import io.fimataf.ancestry.annotations.Child;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -9,22 +10,23 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 23/01/2021
  */
 @Document
-public class SaveSingleEntityC {
+public class ParentB {
 
     @Id
     private String id;
 
+    @Indexed
     private String name;
 
     @Child(linkToChild = true)
-    private SaveSingleEntityD saveSingleEntityD;
+    private ChildB childB;
 
-    public SaveSingleEntityC(String name, SaveSingleEntityD saveSingleEntityD) {
+    public ParentB(String name, ChildB childB) {
         this.name = name;
-        this.saveSingleEntityD = saveSingleEntityD;
+        this.childB = childB;
     }
 
-    public SaveSingleEntityC() {
+    public ParentB() {
     }
 
     public String getId() {
@@ -43,11 +45,11 @@ public class SaveSingleEntityC {
         this.name = name;
     }
 
-    public SaveSingleEntityD getSaveSingleEntityD() {
-        return saveSingleEntityD;
+    public ChildB getChildB() {
+        return childB;
     }
 
-    public void setSaveSingleEntityD(SaveSingleEntityD saveSingleEntityD) {
-        this.saveSingleEntityD = saveSingleEntityD;
+    public void setChildB(ChildB childB) {
+        this.childB = childB;
     }
 }

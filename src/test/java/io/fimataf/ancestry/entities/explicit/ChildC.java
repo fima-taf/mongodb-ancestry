@@ -9,15 +9,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 23/01/2021
  */
 @Document
-@TypeAlias("SaveSingleEntityF")
-public class SaveSingleEntityF {
+@TypeAlias("childC")
+public class ChildC {
 
     @Id
     private String id;
 
     private String name;
 
-    private String _saveSingleEntityEId;
+    private String _parentCId;
 
     public String getId() {
         return id;
@@ -35,11 +35,11 @@ public class SaveSingleEntityF {
         this.name = name;
     }
 
-    public String get_saveSingleEntityEId() {
-        return _saveSingleEntityEId;
+    public String get_parentCId() {
+        return _parentCId;
     }
 
-    public void set_saveSingleEntityEId(String _saveSingleEntityEId) {
-        this._saveSingleEntityEId = _saveSingleEntityEId;
+    public void set_parentCId(String _parentCId) {
+        this._parentCId = _parentCId;
     }
 }

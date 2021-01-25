@@ -1,8 +1,7 @@
 package io.fimataf.ancestry;
 
 import io.fimataf.ancestry.config.LocalMongodbConfig;
-import io.fimataf.ancestry.entities.Car;
-import io.fimataf.ancestry.entities.Person;
+import io.fimataf.ancestry.config.MongodbConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,14 +13,14 @@ import org.springframework.test.context.ContextConfiguration;
  * Created on: 21/01/2021
  */
 @SpringBootTest
-@ContextConfiguration(classes = {LocalMongodbConfig.class})
+@ContextConfiguration(classes = {LocalMongodbConfig.class, MongodbConfig.class})
 public abstract class LocalMongodbTest {
 
     @Autowired
     protected MongoTemplate mongoTemplate;
 
-//    @Test
-//    void contextLoads() {
+    @Test
+    void contextLoads() {
 //        Person person = new Person();
 //        person.setAge(2);
 //        person.setName("Nice person");
@@ -30,7 +29,7 @@ public abstract class LocalMongodbTest {
 //        person.setCar(car);
 ////        car.setPerson(person);
 //        Person savedPerson = mongoTemplate.insert(person);
-//
-//    }
+
+    }
 
 }

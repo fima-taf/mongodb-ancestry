@@ -19,7 +19,13 @@ public class AncestryUtils {
 
     public static String getDocumentFieldName (Field field) {
         if (field.isAnnotationPresent(org.springframework.data.mongodb.core.mapping.Field.class)) {
-            return field.getAnnotation(org.springframework.data.mongodb.core.mapping.Field.class).name();
+            String fieldName;
+            if (!field.getAnnotation(org.springframework.data.mongodb.core.mapping.Field.class).name().isEmpty()) {
+                fieldName = field.getAnnotation(org.springframework.data.mongodb.core.mapping.Field.class).name();
+            } else {
+                fieldName = field.getAnnotation(org.springframework.data.mongodb.core.mapping.Field.class).value();
+            }
+            return fieldName;
         } else {
             return field.getName();
         }

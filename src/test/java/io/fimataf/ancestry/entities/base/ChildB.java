@@ -10,18 +10,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 23/01/2021
  */
 @Document
-@TypeAlias("SaveSingleEntityF")
-public class SaveSingleEntityF {
+@TypeAlias("childB")
+public class ChildB {
 
     @Id
     private String id;
 
     private String name;
 
-    @Parent(keepAfterSave = true)
-    private SaveSingleEntityE saveSingleEntityE;
+    @Parent
+    private ParentB parentB;
 
-    public SaveSingleEntityF(String name) {
+    public ChildB(String name) {
         this.name = name;
     }
 
@@ -41,11 +41,11 @@ public class SaveSingleEntityF {
         this.name = name;
     }
 
-    public SaveSingleEntityE getSaveSingleEntityE() {
-        return saveSingleEntityE;
+    public ParentB getParentB() {
+        return parentB;
     }
 
-    public void setSaveSingleEntityE(SaveSingleEntityE saveSingleEntityE) {
-        this.saveSingleEntityE = saveSingleEntityE;
+    public void setParentB(ParentB parentB) {
+        this.parentB = parentB;
     }
 }

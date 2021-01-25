@@ -1,24 +1,24 @@
 package io.fimataf.ancestry.entities.explicit;
 
-import io.fimataf.ancestry.entities.base.SaveSingleEntityC;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author fima
- * Created on: 23/01/2021
+ * Created on: 22/01/2021
  */
 @Document
-@TypeAlias("SaveSingleEntityD")
-public class SaveSingleEntityD {
+@TypeAlias("parentA")
+public class ParentA {
 
     @Id
     private String id;
 
     private String name;
 
-    private String _saveSingleEntityCId;
+//    @Field("_other-nameId")
+    private String _childAId;
 
     public String getId() {
         return id;
@@ -36,11 +36,11 @@ public class SaveSingleEntityD {
         this.name = name;
     }
 
-    public String get_saveSingleEntityCId() {
-        return _saveSingleEntityCId;
+    public String get_childAId() {
+        return _childAId;
     }
 
-    public void set_saveSingleEntityCId(String _saveSingleEntityCId) {
-        this._saveSingleEntityCId = _saveSingleEntityCId;
+    public void set_childAId(String _childAId) {
+        this._childAId = _childAId;
     }
 }
