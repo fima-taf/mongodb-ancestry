@@ -1,6 +1,7 @@
 package io.fimataf.ancestry.entities.base;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 22/01/2021
  */
 @Document
+@TypeAlias("childA")
 public class ChildA {
 
     @Id

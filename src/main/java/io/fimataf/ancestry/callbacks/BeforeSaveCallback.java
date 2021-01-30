@@ -1,20 +1,21 @@
 package io.fimataf.ancestry.callbacks;
 
 import io.fimataf.ancestry.annotations.Child;
+import io.fimataf.ancestry.annotations.AncestryActions;
 import io.fimataf.ancestry.annotations.Parent;
-import io.fimataf.ancestry.entities.CustomChild;
+import io.fimataf.ancestry.entities.CustomRelative;
+import io.fimataf.ancestry.exceptions.AncestryMongodbException;
+import io.fimataf.ancestry.exceptions.NoParentFoundException;
+import io.fimataf.ancestry.repositories.DBActions;
 import io.fimataf.ancestry.utils.AncestryUtils;
 import org.bson.Document;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author fima
@@ -24,8 +25,8 @@ public class BeforeSaveCallback extends AbstractSaveCallback {
 
     private String childFieldName;
 
-    public BeforeSaveCallback (MongoOperations mongoOperations, String collectionName, Document document, Object source) {
-        super(mongoOperations, collectionName, document, source);
+    public BeforeSaveCallback (DBActions dbActions, String collectionName, Document document, Object source) {
+        super(dbActions, collectionName, document, source);
     }
 
     @Override
@@ -36,10 +37,27 @@ public class BeforeSaveCallback extends AbstractSaveCallback {
             removeChildFromDocument();
             Object child = field.get(source);
             if (!field.getAnnotation(Child.class).linkToChild()) {
-                saveChild(child, field);
+                checkChild(child, field);
             }
         } else if (field.isAnnotationPresent(Parent.class)) {
-            saveChildWithParentId(field);
+            checkParent(field);
+        }
+    }
+
+    private void checkParent(Field field) throws IllegalAccessException {
+        document.remove(AncestryUtils.getDocumentFieldName(field));
+        if (!checkIfParentIsLinkToChild(field)) {
+            checkIfChildLinkedWithOtherParent(field);
+            Object parent = field.get(source);
+            Object childId = AncestryUtils.getEntityIdValue(source);
+            if (childId != null && parent != null) {
+                Object newParent = instanciateNewParentObject(parent, instanciateNewChildObject(source));
+                dbActions.saveEntity(newParent);
+            } else if (childId == null && parent != null) {
+                throw new AncestryMongodbException("Cannot replace parent of a child without ID. First Create the child, and then replace the parent");
+            }
+        } else {
+            saveChildWithParent(field.get(source), AncestryUtils.getDocumentFieldName(field));
         }
     }
 
@@ -47,51 +65,73 @@ public class BeforeSaveCallback extends AbstractSaveCallback {
         document.remove(childFieldName);
     }
 
-    private void saveChild (Object child, Field parentField) throws IllegalAccessException {
-        if (child != null) {
-            Object savedChild = mongoOperations.save(child);
-            for (Field field : savedChild.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(Id.class)) {
-                    ReflectionUtils.makeAccessible(field);
-                    Object childId = field.get(savedChild);
-                    document.put(AncestryUtils.generateAncestryIdFieldName(childFieldName), childId.toString());
+    private void checkChild(Object child, Field parentField) throws IllegalAccessException {
+        List<CustomRelative> childList = checkIfChildIdExistsOnParent(childFieldName);
+        if (childList.isEmpty()) {
+            if (child != null) {
+                saveChild(child, null, parentField);
+            }
+        } else if (childList.size() == 1) {
+            String existingChildId = childList.get(0).getRelativeId();
+            if (child != null) {
+                String newChildId = getIdFromEntity(child);
+                if (newChildId != null && newChildId.equals(existingChildId)) {
+                    saveChild(child, existingChildId, parentField);
                     return;
+                } else {
+                    saveChild(child, null, parentField);
                 }
             }
-        } else {
-            isChildIdExists(parentField);
-        }
-    }
-
-    private void saveChildWithParentId (Field parentField) throws IllegalAccessException {
-        Object parent = parentField.get(source);
-        if (parent == null) return;
-        for (Field field : parent.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
-                ReflectionUtils.makeAccessible(field);
-                Object parentId = field.get(parent);
-                String parentDocName = AncestryUtils.getDocumentFieldName(parentField);
-                document.remove(parentDocName);
-                document.put(AncestryUtils.generateAncestryIdFieldName(parentDocName), parentId);
-                return;
+            if (parentField.getAnnotation(Child.class).onChildChange() == AncestryActions.DELETE) {
+                removeChildEntity(existingChildId, parentField.getType());
             }
         }
     }
 
-    private void isChildIdExists (Field field) throws IllegalAccessException {
-        MatchOperation matchId = Aggregation.match(new Criteria(AncestryUtils.DEFAULT_ID_FIELD_NAME).is(AncestryUtils.getEntityIdValue(source)));
-        ProjectionOperation excludeId = Aggregation.project(AncestryUtils.generateAncestryIdFieldName(childFieldName)).andExclude(AncestryUtils.DEFAULT_ID_FIELD_NAME);
-        ProjectionOperation renamedChildId = Aggregation.project().and(AncestryUtils.generateAncestryIdFieldName(childFieldName)).as(CustomChild.CHILD_ID);
-
-        Aggregation aggregation = Aggregation.newAggregation(matchId, excludeId, renamedChildId);
-
-        AggregationResults<CustomChild> result = mongoOperations.aggregate(aggregation, collectionName, CustomChild.class);
-
-        if (result.getMappedResults().size() == 1) {
-            addChildToDocument(field, result.getMappedResults().get(0).getChildId());
-        } else if (result.getMappedResults().size() > 1) {
-            // for many to many support
+    private void checkIfChildLinkedWithOtherParent (Field field) throws IllegalAccessException {
+        String childFieldNameInParent = getChildFieldNameInParent(field);
+        List<CustomRelative> parents = checkIfChildExistsOnOtherParents(childFieldNameInParent, getCollectionNameFromEntity(field.getType()));
+        if (parents != null && parents.size() > 0) {
+            dbActions.updateFields(AncestryUtils.generateAncestryIdFieldName(childFieldNameInParent),
+                    parents.stream().map(CustomRelative::getRelativeId).collect(Collectors.toList()),
+                    field.getType());
         }
+    }
+
+    private String getChildFieldNameInParent (Field parentField) {
+        for (Field field : parentField.getType().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Child.class)) {
+                return AncestryUtils.getDocumentFieldName(field);
+            }
+        }
+        return null;
+    }
+
+    private void saveChild (Object child, String existingId, Field parentField) throws IllegalAccessException {
+        Object savedChild = dbActions.saveEntity(child);
+        addChildToDocument(parentField, existingId != null ? existingId : getIdFromEntity(savedChild));
+    }
+
+    private void saveChildWithParent(Object parent, String parentDocName) throws IllegalAccessException {
+        if (parent != null) {
+            Object parentId = getIdFromEntity(parent);
+            if (parentId == null) {
+                throw new NoParentFoundException("Parent's id is null. First create the parent and then link it to the child.");
+            }
+            document.put(AncestryUtils.generateAncestryIdFieldName(parentDocName), parentId);
+        }
+    }
+
+    private void removeChildEntity (String existingChildId, Class<?> clazz) {
+        Query q = new Query(Criteria.where(AncestryUtils.DEFAULT_ID_FIELD_NAME).is(existingChildId));
+        dbActions.removeByQueryAndClass(q, clazz);
+    }
+
+    private boolean checkIfParentIsLinkToChild(Field parentField) {
+        for (Field field : parentField.getType().getDeclaredFields()) {
+            if (field.isAnnotationPresent(Child.class) && field.getAnnotation(Child.class).linkToChild()) return true;
+        }
+        return false;
     }
 
 }

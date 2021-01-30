@@ -10,8 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 23/01/2021
  */
 @Document
-@TypeAlias("childC")
-public class ChildC {
+@TypeAlias("childF")
+public class ChildF {
 
     @Id
     private String id;
@@ -19,9 +19,9 @@ public class ChildC {
     private String name;
 
     @Parent
-    private ParentC parentC;
+    private ParentF parentF;
 
-    public ChildC(String name) {
+    public ChildF(String name) {
         this.name = name;
     }
 
@@ -41,11 +41,11 @@ public class ChildC {
         this.name = name;
     }
 
-    public ParentC getParentC() {
-        return parentC;
+    public ParentF getParentF() {
+        return parentF;
     }
 
-    public void setParentC(ParentC parentC) {
-        this.parentC = parentC;
+    public void setParentF(ParentF parentF) {
+        this.parentF = parentF;
     }
 }

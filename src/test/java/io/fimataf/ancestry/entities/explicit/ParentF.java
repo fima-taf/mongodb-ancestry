@@ -1,29 +1,23 @@
-package io.fimataf.ancestry.entities.base;
+package io.fimataf.ancestry.entities.explicit;
 
-import io.fimataf.ancestry.annotations.Parent;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @author fima
- * Created on: 23/01/2021
+ * Created on: 28/01/2021
  */
 @Document
-@TypeAlias("childC")
-public class ChildC {
+@TypeAlias("parentF")
+public class ParentF {
 
     @Id
     private String id;
 
     private String name;
 
-    @Parent
-    private ParentC parentC;
-
-    public ChildC(String name) {
-        this.name = name;
-    }
+    private String _childFId;
 
     public String getId() {
         return id;
@@ -41,11 +35,11 @@ public class ChildC {
         this.name = name;
     }
 
-    public ParentC getParentC() {
-        return parentC;
+    public String get_childFId() {
+        return _childFId;
     }
 
-    public void setParentC(ParentC parentC) {
-        this.parentC = parentC;
+    public void set_childFId(String _childFId) {
+        this._childFId = _childFId;
     }
 }

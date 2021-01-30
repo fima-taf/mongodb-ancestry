@@ -2,6 +2,7 @@ package io.fimataf.ancestry.tests;
 
 import io.fimataf.ancestry.LocalMongodbTest;
 import io.fimataf.ancestry.entities.base.*;
+import io.fimataf.ancestry.exceptions.NoParentFoundException;
 import io.fimataf.ancestry.utils.AncestryUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,76 +16,94 @@ import org.springframework.data.mongodb.core.query.Query;
 public class SaveSingleEntityTest extends LocalMongodbTest {
 
     @Test
-    void saveEntityWithChildAnnotation () {
-        ChildA cA = new ChildA("Bar Save");
-        ParentA pA = new ParentA("saveEntityWithChildAnnotation", cA);
-        ParentA savedPA = mongoTemplate.insert(pA);
+    void saveParentEntityWithChild () {
+        ChildA child = new ChildA("Bar Save");
+        ParentA parent = new ParentA("saveEntityWithChildAnnotation", child);
+        ParentA savedParent = mongoTemplate.insert(parent);
 
-        Assertions.assertNotNull(savedPA.getId());
+        Assertions.assertNotNull(savedParent.getId());
 
         Query q = new Query();
-        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("childA")).is(savedPA.getChildA().getId()));
-        io.fimataf.ancestry.entities.explicit.ParentA expPA = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ParentA.class);
+        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("childA")).is(savedParent.getChildA().getId()));
+        io.fimataf.ancestry.entities.explicit.ParentA expParent = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ParentA.class);
 
-        Assertions.assertNotNull(expPA);
-        Assertions.assertNotNull(expPA.get_childAId());
-        Assertions.assertEquals(savedPA.getChildA().getId(), expPA.get_childAId());
+        Assertions.assertNotNull(expParent);
+        Assertions.assertNotNull(expParent.get_childAId());
+        Assertions.assertEquals(savedParent.getChildA().getId(), expParent.get_childAId());
     }
 
     @Test
-    void saveEntityWithChildAnnotationAndChildIsNull () {
-        ParentA pA = new ParentA("saveEntityWithChildAnnotationAndChildIsNull");
-        ParentA savedPA = mongoTemplate.insert(pA);
+    void saveParentEntityAndChildIsNull () {
+        ParentA parent = new ParentA("saveEntityWithChildAnnotationAndChildIsNull");
+        ParentA savedParent = mongoTemplate.insert(parent);
 
-        Assertions.assertNotNull(savedPA.getId());
+        Assertions.assertNotNull(savedParent.getId());
 
     }
 
     @Test
     void saveChildEntityWithParentAnnotationAndParentIsNull () {
-        ChildB cB = new ChildB("saveChildEntityWithParentAnnotationAndParentIsNull");
-        ChildB savedCB = mongoTemplate.insert(cB);
+        ChildB child = new ChildB("saveChildEntityWithParentAnnotationAndParentIsNull");
+        ChildB savedChild = mongoTemplate.insert(child);
 
-        Assertions.assertNotNull(savedCB.getId());
+        Assertions.assertNotNull(savedChild.getId());
 
+    }
+
+    @Test
+    void saveChildEntityWithParentAnnotationAndParentIsNotSaved () {
+        ChildB child = new ChildB("saveChildEntityWithParentAnnotationAndParentIsNull");
+        ParentB parent = new ParentB();
+        parent.setName("saveChildEntityWithParentAnnotationAndParentIsNull");
+        child.setParentB(parent);
+        try {
+            mongoTemplate.insert(child);
+        } catch (Exception e) {
+            Assertions.assertTrue(e instanceof NoParentFoundException);
+            Assertions.assertNull(child.getId());
+        }
     }
 
     @Test
     void saveEntityWithChildAndParentAnnotations () {
-        ChildB cB  = new ChildB("Doctor");
-        ParentB pB = new ParentB("saveEntityWithChildAndParentAnnotations", cB);
-        ParentB savedPB = mongoTemplate.insert(pB);
+        ChildB child  = new ChildB("ChildB");
+        ParentB parent = new ParentB("saveEntityWithChildAndParentAnnotations", child);
+        ParentB savedParent = mongoTemplate.insert(parent);
 
-        Assertions.assertNotNull(savedPB.getId());
+        Assertions.assertNotNull(savedParent.getId());
 
-        Query q = new Query();
-        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("parentB")).is(savedPB.getId()));
-        io.fimataf.ancestry.entities.explicit.ChildB expCB = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ChildB.class);
+        Query q = new Query(Criteria.where(AncestryUtils.generateAncestryIdFieldName("parentB")).is(savedParent.getId()));
+        io.fimataf.ancestry.entities.explicit.ChildB expChild = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ChildB.class);
 
-        Assertions.assertNotNull(expCB);
-        Assertions.assertNotNull(expCB.get_parentBId());
-        Assertions.assertEquals(savedPB.getId(), expCB.get_parentBId());
+        Assertions.assertNotNull(expChild);
+        Assertions.assertNotNull(expChild.get_parentBId());
+        Assertions.assertEquals(savedParent.getId(), expChild.get_parentBId());
 
-        Assertions.assertNull(savedPB.getChildB().getParentB());
+        Assertions.assertNull(savedParent.getChildB().getParentB().getChildB());
     }
 
+
     @Test
-    void saveEntityWithChildAndParentAnnotationsAndKeepParent () {
-        ChildC cC  = new ChildC("Foo");
-        ParentC pC = new ParentC("saveEntityWithChildAndParentAnnotationsAndKeepParent", cC);
-        ParentC savedPC = mongoTemplate.insert(pC);
+    void saveParentWithChildThatHasOtherParent () {
+        ChildG child = new ChildG("saveParentWithChildThatHasOtherParent");
+        ParentG parent1 = new ParentG("saveParentWithChildThatHasOtherParent", child);
+        ParentG savedParent1 = mongoTemplate.save(parent1);
 
-        Assertions.assertNotNull(savedPC.getId());
+        ParentG parent2 = new ParentG("saveParentWithChildThatHasOtherParent", child);
+        ParentG savedParent2 = mongoTemplate.save(parent2);
 
-        Query q = new Query();
-        q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("parentC")).is(savedPC.getId()));
-        io.fimataf.ancestry.entities.explicit.ChildC expCC = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ChildC.class);
+        Query q = new Query(Criteria.where(AncestryUtils.DEFAULT_ID_FIELD_NAME).is(savedParent1.getId()));
+        io.fimataf.ancestry.entities.explicit.ParentG expParent = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ParentG.class);
 
-        Assertions.assertNotNull(expCC);
-        Assertions.assertNotNull(expCC.get_parentCId());
-        Assertions.assertEquals(savedPC.getId(), expCC.get_parentCId());
+        Assertions.assertNotNull(expParent);
+        Assertions.assertNull(expParent.get_childGId());
 
-        Assertions.assertNotNull(savedPC.getChildC().getParentC());
+        Query q2 = new Query(Criteria.where(AncestryUtils.DEFAULT_ID_FIELD_NAME).is(savedParent2.getId()));
+        io.fimataf.ancestry.entities.explicit.ParentG expParent2 = mongoTemplate.findOne(q2, io.fimataf.ancestry.entities.explicit.ParentG.class);
+
+        Assertions.assertNotNull(expParent2);
+        Assertions.assertNotNull(expParent2.getId());
+        Assertions.assertEquals(expParent2.get_childGId(), child.getId());
     }
 
 }

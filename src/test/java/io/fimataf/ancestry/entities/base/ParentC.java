@@ -1,6 +1,7 @@
 package io.fimataf.ancestry.entities.base;
 
 import io.fimataf.ancestry.annotations.Child;
+import io.fimataf.ancestry.annotations.AncestryActions;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,7 +17,7 @@ public class ParentC {
 
     private String name;
 
-    @Child(linkToChild = true)
+    @Child(linkToChild = true, onChildChange = AncestryActions.DETACH)
     private ChildC childC;
 
     public ParentC(String name, ChildC childC) {

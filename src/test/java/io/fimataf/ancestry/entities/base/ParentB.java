@@ -2,6 +2,7 @@ package io.fimataf.ancestry.entities.base;
 
 import io.fimataf.ancestry.annotations.Child;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created on: 23/01/2021
  */
 @Document
+@TypeAlias("parentB")
 public class ParentB {
 
     @Id
@@ -25,6 +27,8 @@ public class ParentB {
         this.name = name;
         this.childB = childB;
     }
+
+
 
     public ParentB() {
     }
