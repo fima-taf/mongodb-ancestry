@@ -3,6 +3,7 @@ package io.fimataf.ancestry.callbacks;
 import io.fimataf.ancestry.annotations.Child;
 import io.fimataf.ancestry.annotations.Parent;
 import io.fimataf.ancestry.entities.CustomRelative;
+import io.fimataf.ancestry.exceptions.AncestryMongodbException;
 import io.fimataf.ancestry.repositories.DBActions;
 import io.fimataf.ancestry.utils.AncestryUtils;
 import org.bson.Document;
@@ -69,9 +70,8 @@ public abstract class AbstractSaveCallback implements ReflectionUtils.FieldCallb
             }
             return newParentInstance;
         } catch (Exception e) {
-
+            throw new AncestryMongodbException("The object " + object.getClass().getName() + " must have any empty constructor");
         }
-        return null;
     }
 
     protected Object instanciateNewChildObject (Object object) {
@@ -85,9 +85,8 @@ public abstract class AbstractSaveCallback implements ReflectionUtils.FieldCallb
             }
             return newParentInstance;
         } catch (Exception e) {
-
+            throw new AncestryMongodbException("The object " + object.getClass().getName() + " must have any empty constructor");
         }
-        return null;
     }
 
     protected String getIdFromEntity (Object entity) throws IllegalAccessException {

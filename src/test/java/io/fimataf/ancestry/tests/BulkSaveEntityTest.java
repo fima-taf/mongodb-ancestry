@@ -1,9 +1,9 @@
 package io.fimataf.ancestry.tests;
 
 import io.fimataf.ancestry.LocalMongodbTest;
-import io.fimataf.ancestry.entities.base.ChildA;
-import io.fimataf.ancestry.entities.base.ChildB;
-import io.fimataf.ancestry.entities.base.ParentA;
+import io.fimataf.ancestry.entities.base.single.ChildA;
+import io.fimataf.ancestry.entities.base.single.ChildB;
+import io.fimataf.ancestry.entities.base.single.ParentA;
 import io.fimataf.ancestry.utils.AncestryUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class BulkSaveEntityTest extends LocalMongodbTest {
 
         Query q = new Query();
         q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("childA")).in(cA1.getId(), cA2.getId()));
-        List<io.fimataf.ancestry.entities.explicit.ParentA> expPAList = mongoTemplate.find(q, io.fimataf.ancestry.entities.explicit.ParentA.class);
+        List<io.fimataf.ancestry.entities.explicit.single.ParentA> expPAList = mongoTemplate.find(q, io.fimataf.ancestry.entities.explicit.single.ParentA.class);
 
         Assertions.assertNotNull(expPAList);
         Assertions.assertEquals(expPAList.size(), savedParents.size());

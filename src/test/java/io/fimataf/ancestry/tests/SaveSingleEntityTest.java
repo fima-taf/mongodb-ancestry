@@ -1,7 +1,7 @@
 package io.fimataf.ancestry.tests;
 
 import io.fimataf.ancestry.LocalMongodbTest;
-import io.fimataf.ancestry.entities.base.*;
+import io.fimataf.ancestry.entities.base.single.*;
 import io.fimataf.ancestry.exceptions.NoParentFoundException;
 import io.fimataf.ancestry.utils.AncestryUtils;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Query;
 public class SaveSingleEntityTest extends LocalMongodbTest {
 
     @Test
-    void saveParentEntityWithChild () {
+    void saveParentEntityWithSimpleChild () {
         ChildA child = new ChildA("Bar Save");
         ParentA parent = new ParentA("saveEntityWithChildAnnotation", child);
         ParentA savedParent = mongoTemplate.insert(parent);
@@ -25,7 +25,7 @@ public class SaveSingleEntityTest extends LocalMongodbTest {
 
         Query q = new Query();
         q.addCriteria(Criteria.where(AncestryUtils.generateAncestryIdFieldName("childA")).is(savedParent.getChildA().getId()));
-        io.fimataf.ancestry.entities.explicit.ParentA expParent = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ParentA.class);
+        io.fimataf.ancestry.entities.explicit.single.ParentA expParent = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.single.ParentA.class);
 
         Assertions.assertNotNull(expParent);
         Assertions.assertNotNull(expParent.get_childAId());
@@ -73,7 +73,7 @@ public class SaveSingleEntityTest extends LocalMongodbTest {
         Assertions.assertNotNull(savedParent.getId());
 
         Query q = new Query(Criteria.where(AncestryUtils.generateAncestryIdFieldName("parentB")).is(savedParent.getId()));
-        io.fimataf.ancestry.entities.explicit.ChildB expChild = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ChildB.class);
+        io.fimataf.ancestry.entities.explicit.single.ChildB expChild = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.single.ChildB.class);
 
         Assertions.assertNotNull(expChild);
         Assertions.assertNotNull(expChild.get_parentBId());
@@ -93,13 +93,13 @@ public class SaveSingleEntityTest extends LocalMongodbTest {
         ParentG savedParent2 = mongoTemplate.save(parent2);
 
         Query q = new Query(Criteria.where(AncestryUtils.DEFAULT_ID_FIELD_NAME).is(savedParent1.getId()));
-        io.fimataf.ancestry.entities.explicit.ParentG expParent = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.ParentG.class);
+        io.fimataf.ancestry.entities.explicit.single.ParentG expParent = mongoTemplate.findOne(q, io.fimataf.ancestry.entities.explicit.single.ParentG.class);
 
         Assertions.assertNotNull(expParent);
         Assertions.assertNull(expParent.get_childGId());
 
         Query q2 = new Query(Criteria.where(AncestryUtils.DEFAULT_ID_FIELD_NAME).is(savedParent2.getId()));
-        io.fimataf.ancestry.entities.explicit.ParentG expParent2 = mongoTemplate.findOne(q2, io.fimataf.ancestry.entities.explicit.ParentG.class);
+        io.fimataf.ancestry.entities.explicit.single.ParentG expParent2 = mongoTemplate.findOne(q2, io.fimataf.ancestry.entities.explicit.single.ParentG.class);
 
         Assertions.assertNotNull(expParent2);
         Assertions.assertNotNull(expParent2.getId());
